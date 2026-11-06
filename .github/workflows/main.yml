@@ -1,4 +1,4 @@
-name: Build Defensores do Vale
+name: Build Defensores do Vale (diagnostico)
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Gerar executavel para Windows
+    name: Gerar executavel com janela de diagnostico
     runs-on: windows-latest
 
     steps:
@@ -31,17 +31,19 @@ jobs:
         shell: pwsh
         run: |
           if (-not (Test-Path "jogo.py")) {
-            Write-Error "O arquivo jogo.py nao foi encontrado na raiz do repositorio. Confira o nome e a pasta do arquivo."
+            Write-Error "O arquivo jogo.py nao foi encontrado na raiz do repositorio."
             exit 1
           }
 
-      - name: Gerar executavel
-        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name DefensoresDoVale jogo.py
+      - name: Gerar executavel (mostrar erros ao abrir)
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --console
+          --collect-all pygame --name DefensoresDoVale jogo.py
 
       - name: Enviar executavel para Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Defensores-do-Vale-Windows
+          name: Defensores-do-Vale-Windows-Diagnostico
           path: dist/DefensoresDoVale.exe
           if-no-files-found: error
           retention-days: 14

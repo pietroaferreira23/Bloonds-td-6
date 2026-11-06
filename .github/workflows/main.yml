@@ -23,23 +23,20 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install pygame pyinstaller
 
-      - name: Conferir arquivo principal
+      - name: Verificar arquivo do jogo
         shell: pwsh
         run: |
-          if (-not (Test-Path "main.py")) {
-            Write-Error "O arquivo main.py nao foi encontrado na raiz do repositorio. Salve o codigo completo do jogo nesse arquivo."
+          if (-not (Test-Path "jogo.py")) {
+            Write-Error "O arquivo jogo.py nao foi encontrado na raiz do repositorio. Confira o nome e a pasta do arquivo."
             exit 1
           }
 
       - name: Gerar executavel
-        shell: pwsh
-        run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name DefensoresDoVale main.py
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name DefensoresDoVale jogo.py
 
       - name: Enviar executavel para Artifacts
         uses: actions/upload-artifact@v4

@@ -1,18 +1,20 @@
-name: Defensores do Vale
+name: Build Defensores do Vale
 
 on:
   push:
     branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  validar-projeto:
-    runs-on: ubuntu-latest
+  build-windows:
+    name: Gerar executavel para Windows
+    runs-on: windows-latest
 
     steps:
-      - name: Baixar codigo
+      - name: Baixar codigo do repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Python
@@ -20,13 +22,29 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Atualizar pip e instalar Pygame
+      - name: Instalar dependencias
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pygame
+          python -m pip install pygame pyinstaller
 
-      - name: Verificar sintaxe Python
-        run: python -m compileall -q .
+      - name: Conferir arquivo principal
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "main.py")) {
+            Write-Error "O arquivo main.py nao foi encontrado na raiz do repositorio. Salve o codigo completo do jogo nesse arquivo."
+            exit 1
+          }
 
-      - name: Verificar dependencias
-        run: python -m pip check
+      - name: Gerar executavel
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name DefensoresDoVale main.py
+
+      - name: Enviar executavel para Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Defensores-do-Vale-Windows
+          path: dist/DefensoresDoVale.exe
+          if-no-files-found: error
+          retention-days: 14
